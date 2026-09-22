@@ -41,7 +41,6 @@ public class MainActivity extends Activity {
         
         // Transparent background taaki white box na dikhe
         webView.setBackgroundColor(Color.TRANSPARENT);
-        webView.getSettings().setAppCacheEnabled(true);
 
         // JavaScript bridge add karna
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
