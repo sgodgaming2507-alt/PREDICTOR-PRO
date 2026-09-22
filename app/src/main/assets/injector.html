@@ -144,19 +144,18 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             
+            // Exact 30-second WinGo period index calculation matching game format
             const totalSecondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            const periodIndex = Math.floor(totalSecondsToday / 30);
-            const periodCode = year + month + day + "01" + (100000 + periodIndex);
+            const periodIndex = Math.floor(totalSecondsToday / 30) + 1;
+            const paddedIndex = String(periodIndex).padStart(5, '0');
+            const periodCode = year + month + day + paddedIndex;
             
             if (currentPeriod !== periodCode) {
                 currentPeriod = periodCode;
                 
-                // Advanced Smart Formula based on period last digits
+                // Balanced prediction logic
                 const lastDigit = parseInt(periodCode.slice(-1));
-                const secondLastDigit = parseInt(periodCode.slice(-2, -1));
-                
-                // Mix up logic so it alternates evenly between BIG and SMALL
-                if ((lastDigit + secondLastDigit) % 2 === 0) {
+                if (lastDigit % 2 === 0) {
                     currentPrediction = "BIG";
                 } else {
                     currentPrediction = "SMALL";
@@ -184,7 +183,7 @@
                     resBox.style.borderColor = "#ff3333";
                     resBox.style.boxShadow = "0 0 10px #ff3333 inset";
                 }
-            }, 400);
+            }, 300);
         }
 
         function minimizeApp() {
