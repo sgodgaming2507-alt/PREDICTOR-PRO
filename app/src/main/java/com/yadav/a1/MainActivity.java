@@ -10,6 +10,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.view.WindowManager;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.graphics.Color;
 
@@ -22,7 +24,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // System overlay permission check for Android 6.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
@@ -38,11 +39,8 @@ public class MainActivity extends Activity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        
-        // Transparent background taaki white box na dikhe
         webView.setBackgroundColor(Color.TRANSPARENT);
 
-        // JavaScript bridge add karna
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
         webView.loadUrl("file:///android_asset/injector.html");
 
@@ -67,6 +65,45 @@ public class MainActivity extends Activity {
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         windowManager.addView(webView, params);
+
+        // Smart touch listener: buttons click bhi honge aur window drag bhi hogi
+        webView.setOnTouchListener(new View.OnTouchListener() {
+            private int initialX, initialY;
+            private float initialTouchX, initialTouchY;
+            private boolean isMoving = false;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initialX = params.x;
+                        initialY = params.y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        isMoving = false;
+                        return false;
+                    case MotionEvent.ACTION_MOVE:
+                        float dx = Math.abs(event.getRawX() - initialTouchX);
+                        float dy = Math.abs(event.getRawY() - initialTouchY);
+                        if (dx > 10 || dy > 10) {
+                            isMoving = true;
+                        }
+                        if (isMoving) {
+                            params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                            params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                            windowManager.updateViewLayout(webView, params);
+                            return true;
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (isMoving) {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
 
         moveTaskToBack(true);
     }
