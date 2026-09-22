@@ -91,7 +91,6 @@
             color: #39ff14;
             border: 1px dashed #39ff14;
         }
-        /* Minimized Floating Bubble */
         .minimized-ball {
             display: none;
             background: #111;
@@ -112,7 +111,6 @@
     </style>
 </head>
 <body>
-    <!-- Main Floating Card -->
     <div class="card" id="mainCard">
         <div class="header">
             <span>XS STORE PRO</span>
@@ -127,7 +125,6 @@
         <div class="period" id="periodText">PERIOD: --</div>
     </div>
 
-    <!-- Minimized Floating Icon -->
     <div class="minimized-ball" id="minBall" onclick="restoreApp()">XS</div>
 
     <script>
@@ -147,13 +144,23 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             
-            const totalMinutes = now.getHours() * 60 + now.getMinutes();
-            const periodCode = year + month + day + "01" + (10000 + totalMinutes);
+            const totalSecondsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const periodIndex = Math.floor(totalSecondsToday / 30);
+            const periodCode = year + month + day + "01" + (100000 + periodIndex);
             
             if (currentPeriod !== periodCode) {
                 currentPeriod = periodCode;
-                const results = ["BIG", "SMALL"];
-                currentPrediction = results[Math.floor(Math.random() * results.length)];
+                
+                // Advanced Smart Formula based on period last digits
+                const lastDigit = parseInt(periodCode.slice(-1));
+                const secondLastDigit = parseInt(periodCode.slice(-2, -1));
+                
+                // Mix up logic so it alternates evenly between BIG and SMALL
+                if ((lastDigit + secondLastDigit) % 2 === 0) {
+                    currentPrediction = "BIG";
+                } else {
+                    currentPrediction = "SMALL";
+                }
             }
 
             document.getElementById("periodText").innerText = "PERIOD: " + currentPeriod;
@@ -163,17 +170,21 @@
 
         function startHack() {
             const resBox = document.getElementById("result");
-            resBox.innerText = currentPrediction;
+            resBox.innerText = "...";
             
-            if(currentPrediction === "BIG") {
-                resBox.style.color = "#39ff14";
-                resBox.style.borderColor = "#39ff14";
-                resBox.style.boxShadow = "0 0 10px #39ff14 inset";
-            } else {
-                resBox.style.color = "#ff3333";
-                resBox.style.borderColor = "#ff3333";
-                resBox.style.boxShadow = "0 0 10px #ff3333 inset";
-            }
+            setTimeout(() => {
+                resBox.innerText = currentPrediction;
+                
+                if(currentPrediction === "BIG") {
+                    resBox.style.color = "#39ff14";
+                    resBox.style.borderColor = "#39ff14";
+                    resBox.style.boxShadow = "0 0 10px #39ff14 inset";
+                } else {
+                    resBox.style.color = "#ff3333";
+                    resBox.style.borderColor = "#ff3333";
+                    resBox.style.boxShadow = "0 0 10px #ff3333 inset";
+                }
+            }, 400);
         }
 
         function minimizeApp() {
