@@ -10,9 +10,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.view.WindowManager;
 import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.graphics.Color;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -40,6 +39,10 @@ public class MainActivity extends Activity {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         
+        // Transparent background taaki white box na dikhe
+        webView.setBackgroundColor(Color.TRANSPARENT);
+        webView.getSettings().setAppCacheEnabled(true);
+
         // JavaScript bridge add karna
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
         webView.loadUrl("file:///android_asset/injector.html");
@@ -65,32 +68,6 @@ public class MainActivity extends Activity {
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         windowManager.addView(webView, params);
-
-        // Draggable floating window touch listener
-        webView.setOnTouchListener(new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = params.x;
-                        initialY = params.y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        windowManager.updateViewLayout(webView, params);
-                        return true;
-                }
-                return false;
-            }
-        });
 
         moveTaskToBack(true);
     }
