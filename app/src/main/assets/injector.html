@@ -21,6 +21,7 @@
             padding: 10px;
             text-align: center;
             color: white;
+            position: relative;
         }
         .header {
             font-size: 13px;
@@ -31,22 +32,30 @@
             justify-content: space-between;
             align-items: center;
         }
+        .controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
         .timer-badge {
             background: #222;
             color: #ff3333;
             font-size: 11px;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 4px;
             border: 1px solid #ff3333;
         }
-        .close-btn {
+        .action-btn {
             background: none;
             border: none;
-            color: #ff3333;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            padding: 0 3px;
         }
+        .minimize-btn { color: #ffaa00; }
+        .close-btn { color: #ff3333; }
+        
         .result-box {
             width: 55px;
             height: 55px;
@@ -82,25 +91,49 @@
             color: #39ff14;
             border: 1px dashed #39ff14;
         }
+        /* Minimized Floating Bubble */
+        .minimized-ball {
+            display: none;
+            background: #111;
+            border: 2px solid #39ff14;
+            color: #39ff14;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 0 10px #39ff14;
+            cursor: pointer;
+            text-align: center;
+            line-height: 41px;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
+    <!-- Main Floating Card -->
+    <div class="card" id="mainCard">
         <div class="header">
             <span>XS STORE PRO</span>
-            <span class="timer-badge" id="timer">00:30</span>
-            <button class="close-btn" onclick="closeApp()">×</button>
+            <div class="controls">
+                <span class="timer-badge" id="timer">00:30</span>
+                <button class="action-btn minimize-btn" onclick="minimizeApp()">-</button>
+                <button class="action-btn close-btn" onclick="closeApp()">×</button>
+            </div>
         </div>
         <div class="result-box" id="result">READY</div>
         <button class="btn" onclick="startHack()">⚡ START HACK ⚡</button>
         <div class="period" id="periodText">PERIOD: --</div>
     </div>
 
+    <!-- Minimized Floating Icon -->
+    <div class="minimized-ball" id="minBall" onclick="restoreApp()">XS</div>
+
     <script>
         let currentPeriod = "";
         let currentPrediction = "READY";
 
-        // Real-time timer and period generator sync
         function updateTimerAndPeriod() {
             const now = new Date();
             const seconds = now.getSeconds();
@@ -110,7 +143,6 @@
             const timerFormatted = "00:" + (remaining < 10 ? "0" : "") + remaining;
             document.getElementById("timer").innerText = timerFormatted;
 
-            // Generate base period format matching game timestamp style
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
@@ -120,7 +152,6 @@
             
             if (currentPeriod !== periodCode) {
                 currentPeriod = periodCode;
-                // Lock prediction for this period so it doesn't change randomly
                 const results = ["BIG", "SMALL"];
                 currentPrediction = results[Math.floor(Math.random() * results.length)];
             }
@@ -143,6 +174,16 @@
                 resBox.style.borderColor = "#ff3333";
                 resBox.style.boxShadow = "0 0 10px #ff3333 inset";
             }
+        }
+
+        function minimizeApp() {
+            document.getElementById("mainCard").style.display = "none";
+            document.getElementById("minBall").style.display = "flex";
+        }
+
+        function restoreApp() {
+            document.getElementById("minBall").style.display = "none";
+            document.getElementById("mainCard").style.display = "block";
         }
 
         function closeApp() {
